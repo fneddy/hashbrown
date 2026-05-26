@@ -4337,6 +4337,7 @@ impl<T, A: Allocator> RawExtractIf<'_, T, A> {
 #[cfg(test)]
 mod test_map {
     use super::*;
+    use std::vec::Vec;
 
     #[test]
     fn test_prev_pow2() {
@@ -4541,6 +4542,102 @@ mod test_map {
                 );
             }
         }
+    }
+
+    fn assert_same_hash_contents(table: &RawTable<u64>, values: &[u64]) {
+        for &value in values {
+            unsafe {
+                assert_eq!(
+                    table.find(0, |x| *x == value).map(|b| b.read()),
+                    Some(value)
+                );
+            }
+        }
+    }
+
+    fn assert_ctrl_replication(table: &RawTable<u64>) {
+        unsafe {
+            if table.buckets() < Group::WIDTH {
+                for index in 0..table.buckets() {
+                    assert_eq!(
+                        *table.table.ctrl(index),
+                        *table.table.ctrl(Group::WIDTH + index)
+                    );
+                }
+            } else {
+                for index in 0..Group::WIDTH {
+                    assert_eq!(
+                        *table.table.ctrl(index),
+                        *table.table.ctrl(table.buckets() + index)
+                    );
+                }
+            }
+        }
+    }
+
+    fn exercise_same_hash_churn(requested_capacity: usize) {
+        let mut table = RawTable::with_capacity(requested_capacity);
+        let hasher = |_: &u64| 0;
+
+        let mut expected = Vec::new();
+        for value in 0..32_u64 {
+            table.insert(0, value, hasher);
+            expected.push(value);
+            assert_same_hash_contents(&table, &expected);
+            assert_ctrl_replication(&table);
+        }
+
+        for removed in (0..32_u64).step_by(2) {
+            unsafe {
+                let bucket = table.find(0, |x| *x == removed).unwrap();
+                let (value, _) = table.remove(bucket);
+                assert_eq!(value, removed);
+            }
+            expected.retain(|&value| value != removed);
+            assert_same_hash_contents(&table, &expected);
+            assert_ctrl_replication(&table);
+        }
+
+        for value in 100..116_u64 {
+            table.insert(0, value, hasher);
+            expected.push(value);
+            assert_same_hash_contents(&table, &expected);
+            assert_ctrl_replication(&table);
+        }
+    }
+
+    #[test]
+    fn test_same_hash_insert_churn_across_group_width_boundaries() {
+        exercise_same_hash_churn(1);
+        exercise_same_hash_churn(Group::WIDTH - 1);
+        exercise_same_hash_churn(Group::WIDTH);
+        exercise_same_hash_churn(Group::WIDTH + 1);
+        exercise_same_hash_churn(Group::WIDTH * 2);
+    }
+
+    #[test]
+    fn test_find_or_find_insert_index_same_hash_churn() {
+        let mut table = RawTable::with_capacity(Group::WIDTH);
+        let hasher = |_: &u64| 0;
+
+        for value in 0..24_u64 {
+            match table.find_or_find_insert_index(0, |x| *x == value, hasher) {
+                Ok(_) => panic!("unexpected existing value"),
+                Err(index) => unsafe {
+                    assert!(index < table.buckets());
+                    table.insert_at_index(0, index, value);
+                },
+            }
+        }
+
+        for value in 0..24_u64 {
+            match table.find_or_find_insert_index(0, |x| *x == value, hasher) {
+                Ok(bucket) => unsafe { assert_eq!(bucket.read(), value) },
+                Err(_) => panic!("missing existing value"),
+            }
+        }
+
+        assert_ctrl_replication(&table);
     }
 
     #[test]
