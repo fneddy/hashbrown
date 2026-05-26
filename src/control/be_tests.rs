@@ -6,17 +6,11 @@ fn group_match_masks_follow_memory_order() {
     let width = Group::WIDTH;
     assert!(width >= 8);
 
-    let tag0_hash = 0_u64;
-    let tag1_hash = 1_u64 << 57;
-    let tag2_hash = 2_u64 << 57;
-    let tag3_hash = 3_u64 << 57;
-    let filler_hash = 4_u64 << 57;
-
-    let tag0 = Tag::full(tag0_hash);
-    let tag1 = Tag::full(tag1_hash);
-    let tag2 = Tag::full(tag2_hash);
-    let tag3 = Tag::full(tag3_hash);
-    let filler = Tag::full(filler_hash);
+    let tag0 = Tag(0x00);
+    let tag1 = Tag(0x11);
+    let tag2 = Tag(0x22);
+    let tag3 = Tag(0x33);
+    let filler = Tag(0x44);
 
     let mut tags = vec![filler; width];
     tags[0] = Tag::DELETED;
