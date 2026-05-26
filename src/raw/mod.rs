@@ -4477,6 +4477,73 @@ mod test_map {
     /// CHECKING THAT WE DON'T TRY TO DROP DATA IF THE `ITEMS`
     /// ARE ZERO, EVEN IF WE HAVE `FULL` CONTROL BYTES.
     #[test]
+    fn test_small_table_collision_insert_remove_lookup() {
+        let mut table = RawTable::with_capacity(1);
+        let hasher = |_: &u64| 0;
+
+        for value in 0..3 {
+            table.insert(0, value, hasher);
+        }
+
+        for value in 0..3 {
+            unsafe {
+                assert_eq!(
+                    table.find(0, |x| *x == value).map(|b| b.read()),
+                    Some(value)
+                );
+            }
+        }
+
+        unsafe {
+            let removed = table.find(0, |x| *x == 1).unwrap();
+            let (value, _) = table.remove(removed);
+            assert_eq!(value, 1);
+        }
+
+        assert!(table.find(0, |x| *x == 1).is_none());
+
+        table.insert(0, 10, hasher);
+
+        for value in [0, 2, 10] {
+            unsafe {
+                assert_eq!(
+                    table.find(0, |x| *x == value).map(|b| b.read()),
+                    Some(value)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_small_table_prepare_insert_index_after_erase() {
+        let mut table = RawTable::with_capacity(1);
+        let hasher = |_: &u64| 0;
+
+        for value in 0..3 {
+            table.insert(0, value, hasher);
+        }
+
+        unsafe {
+            let removed = table.find(0, |x| *x == 0).unwrap();
+            table.remove(removed);
+        }
+
+        let index = unsafe { table.table.find_insert_index(0) };
+        assert!(index < table.buckets());
+
+        table.insert(0, 99, hasher);
+
+        for value in [1, 2, 99] {
+            unsafe {
+                assert_eq!(
+                    table.find(0, |x| *x == value).map(|b| b.read()),
+                    Some(value)
+                );
+            }
+        }
+    }
+
+    #[test]
     fn test_catch_panic_clone_from() {
         use super::{AllocError, Allocator, Global};
         use ::alloc::sync::Arc;

@@ -1,3 +1,5 @@
+#[cfg(test)]
+mod be_tests;
 mod bitmask;
 mod group;
 mod tag;
