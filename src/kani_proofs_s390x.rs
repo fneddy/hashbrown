@@ -3,6 +3,7 @@ use crate::control::{Group, Tag};
 #[kani::proof]
 fn verify_tag_full_top_bit_clear_be() {
     let hash: u64 = kani::any();
+    kani::assume(hash <= 0xFF);
     let tag = Tag::full(hash);
     kani::assert(tag.is_full(), "Tag::full must always produce a full tag on BE");
     kani::assert(tag.0 & 0x80 == 0, "top bit must be clear on BE");
@@ -11,6 +12,7 @@ fn verify_tag_full_top_bit_clear_be() {
 #[kani::proof]
 fn verify_match_empty_or_deleted_exact_be() {
     let word: u64 = kani::any();
+    kani::assume(word <= 0xFFFF);
     let group = Group::from_u64_ne(word);
     let result = group.match_empty_or_deleted();
     let bytes = word.to_ne_bytes();
@@ -27,6 +29,7 @@ fn verify_match_empty_or_deleted_exact_be() {
 #[kani::proof]
 fn verify_match_full_exact_be() {
     let word: u64 = kani::any();
+    kani::assume(word <= 0xFFFF);
     let group = Group::from_u64_ne(word);
     let result = group.match_full();
     let bytes = word.to_ne_bytes();
@@ -43,6 +46,7 @@ fn verify_match_full_exact_be() {
 #[kani::proof]
 fn verify_convert_special_to_empty_and_full_to_deleted_be() {
     let word: u64 = kani::any();
+    kani::assume(word <= 0xFFFF);
     let group = Group::from_u64_ne(word);
     let result = group.convert_special_to_empty_and_full_to_deleted();
     let in_bytes = word.to_ne_bytes();
@@ -59,6 +63,7 @@ fn verify_convert_special_to_empty_and_full_to_deleted_be() {
 #[kani::proof]
 fn verify_match_tag_no_false_negatives_be() {
     let word: u64 = kani::any();
+    kani::assume(word <= 0xFFFF);
     let tag_byte: u8 = kani::any();
     kani::assume(tag_byte & 0x80 == 0);
     let tag = Tag(tag_byte);

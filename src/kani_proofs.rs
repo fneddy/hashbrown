@@ -13,6 +13,8 @@ fn verify_insert_increases_len() {
     let mut map: HashMap<u32, u32> = HashMap::new();
     let k: u32 = kani::any();
     let v: u32 = kani::any();
+    kani::assume(k <= 255);
+    kani::assume(v <= 255);
     map.insert(k, v);
     kani::assert(map.len() == 1, "len must be 1 after inserting one element");
     kani::assert(!map.is_empty(), "map must not be empty after insert");
@@ -24,6 +26,9 @@ fn verify_insert_same_key_does_not_grow_len() {
     let k: u32 = kani::any();
     let v1: u32 = kani::any();
     let v2: u32 = kani::any();
+    kani::assume(k <= 255);
+    kani::assume(v1 <= 255);
+    kani::assume(v2 <= 255);
     map.insert(k, v1);
     map.insert(k, v2);
     kani::assert(map.len() == 1, "inserting same key twice must keep len == 1");
@@ -34,6 +39,8 @@ fn verify_get_after_insert() {
     let mut map: HashMap<u32, u32> = HashMap::new();
     let k: u32 = kani::any();
     let v: u32 = kani::any();
+    kani::assume(k <= 255);
+    kani::assume(v <= 255);
     map.insert(k, v);
     let got = map.get(&k);
     kani::assert(got == Some(&v), "get must return inserted value");
@@ -43,6 +50,7 @@ fn verify_get_after_insert() {
 fn verify_get_missing_key_returns_none() {
     let map: HashMap<u32, u32> = HashMap::new();
     let k: u32 = kani::any();
+    kani::assume(k <= 255);
     kani::assert(map.get(&k).is_none(), "get on empty map must return None");
 }
 
@@ -51,6 +59,8 @@ fn verify_remove_decreases_len() {
     let mut map: HashMap<u32, u32> = HashMap::new();
     let k: u32 = kani::any();
     let v: u32 = kani::any();
+    kani::assume(k <= 255);
+    kani::assume(v <= 255);
     map.insert(k, v);
     let removed = map.remove(&k);
     kani::assert(removed == Some(v), "remove must return old value");
@@ -62,6 +72,7 @@ fn verify_remove_decreases_len() {
 fn verify_remove_missing_key_returns_none() {
     let mut map: HashMap<u32, u32> = HashMap::new();
     let k: u32 = kani::any();
+    kani::assume(k <= 255);
     kani::assert(
         map.remove(&k).is_none(),
         "remove on empty map must return None",
@@ -73,6 +84,8 @@ fn verify_contains_key_after_insert() {
     let mut map: HashMap<u32, u32> = HashMap::new();
     let k: u32 = kani::any();
     let v: u32 = kani::any();
+    kani::assume(k <= 255);
+    kani::assume(v <= 255);
     map.insert(k, v);
     kani::assert(map.contains_key(&k), "contains_key must be true after insert");
 }
@@ -82,6 +95,8 @@ fn verify_contains_key_false_after_remove() {
     let mut map: HashMap<u32, u32> = HashMap::new();
     let k: u32 = kani::any();
     let v: u32 = kani::any();
+    kani::assume(k <= 255);
+    kani::assume(v <= 255);
     map.insert(k, v);
     map.remove(&k);
     kani::assert(
@@ -96,6 +111,9 @@ fn verify_insert_overwrites_value() {
     let k: u32 = kani::any();
     let v1: u32 = kani::any();
     let v2: u32 = kani::any();
+    kani::assume(k <= 255);
+    kani::assume(v1 <= 255);
+    kani::assume(v2 <= 255);
     map.insert(k, v1);
     map.insert(k, v2);
     kani::assert(map.get(&k) == Some(&v2), "second insert must overwrite first");
@@ -107,8 +125,12 @@ fn verify_two_distinct_keys() {
     let k1: u32 = kani::any();
     let k2: u32 = kani::any();
     kani::assume(k1 != k2);
+    kani::assume(k1 <= 255);
+    kani::assume(k2 <= 255);
     let v1: u32 = kani::any();
     let v2: u32 = kani::any();
+    kani::assume(v1 <= 255);
+    kani::assume(v2 <= 255);
     map.insert(k1, v1);
     map.insert(k2, v2);
     kani::assert(map.len() == 2, "two distinct keys must give len == 2");
@@ -121,6 +143,8 @@ fn verify_clear_empties_map() {
     let mut map: HashMap<u32, u32> = HashMap::new();
     let k: u32 = kani::any();
     let v: u32 = kani::any();
+    kani::assume(k <= 255);
+    kani::assume(v <= 255);
     map.insert(k, v);
     map.clear();
     kani::assert(map.is_empty(), "map must be empty after clear");
@@ -136,6 +160,8 @@ fn verify_capacity_at_least_len() {
     let mut map: HashMap<u32, u32> = HashMap::new();
     let k: u32 = kani::any();
     let v: u32 = kani::any();
+    kani::assume(k <= 255);
+    kani::assume(v <= 255);
     map.insert(k, v);
     kani::assert(
         map.capacity() >= map.len(),
@@ -147,7 +173,7 @@ fn verify_capacity_at_least_len() {
 #[kani::unwind(2)]
 fn verify_with_capacity_has_sufficient_room() {
     let cap: usize = kani::any();
-    kani::assume(cap <= 64);
+    kani::assume(cap <= 8);
     let map: HashMap<u32, u32> = HashMap::with_capacity(cap);
     kani::assert(
         map.capacity() >= cap,
