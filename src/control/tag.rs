@@ -56,6 +56,38 @@ impl Tag {
         Tag((top7 & 0x7f) as u8) // truncation
     }
 }
+}
+
+#[cfg(kani)]
+mod kani_proofs {
+    use super::*;
+
+    #[kani::proof_for_contract(Tag::is_full)]
+    fn contract_tag_is_full() {
+        let t = Tag(kani::any());
+        t.is_full();
+    }
+
+    #[kani::proof_for_contract(Tag::is_special)]
+    fn contract_tag_is_special() {
+        let t = Tag(kani::any());
+        t.is_special();
+    }
+
+    #[kani::proof_for_contract(Tag::special_is_empty)]
+    fn contract_tag_special_is_empty() {
+        let byte: u8 = kani::any();
+        kani::assume(byte & 0x80 != 0);
+        Tag(byte).special_is_empty();
+    }
+
+    #[kani::proof_for_contract(Tag::full)]
+    fn contract_tag_full() {
+        let hash: u8 = kani::any();
+        Tag::full(hash as u64);
+    }
+}
+
 impl fmt::Debug for Tag {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.is_special() {

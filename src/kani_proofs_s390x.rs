@@ -1,6 +1,7 @@
 use crate::control::{Group, Tag};
 
 #[kani::proof]
+#[kani::solver(kissat)]
 fn verify_tag_full_top_bit_clear_be() {
     let hash: u8 = kani::any();
     let tag = Tag::full(hash as u64);
@@ -9,6 +10,10 @@ fn verify_tag_full_top_bit_clear_be() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_full)]
 fn verify_match_empty_or_deleted_exact_be() {
     let word: u16 = kani::any();
     let group = Group::from_u64_ne(word as u64);
@@ -25,6 +30,10 @@ fn verify_match_empty_or_deleted_exact_be() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
 fn verify_match_full_exact_be() {
     let word: u16 = kani::any();
     let group = Group::from_u64_ne(word as u64);
@@ -41,6 +50,11 @@ fn verify_match_full_exact_be() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
 fn verify_convert_special_to_empty_and_full_to_deleted_be() {
     let word: u16 = kani::any();
     let group = Group::from_u64_ne(word as u64);
@@ -57,6 +71,11 @@ fn verify_convert_special_to_empty_and_full_to_deleted_be() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_match_tag_no_false_negatives_be() {
     let word: u16 = kani::any();
     let tag_byte: u8 = kani::any();

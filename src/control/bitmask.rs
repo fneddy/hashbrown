@@ -97,6 +97,35 @@ impl BitMask {
     }
 }
 
+#[cfg(kani)]
+mod kani_proofs {
+    use super::*;
+
+    #[kani::proof_for_contract(BitMask::any_bit_set)]
+    fn contract_any_bit_set() {
+        let word: BitMaskWord = kani::any();
+        BitMask(word).any_bit_set();
+    }
+
+    #[kani::proof_for_contract(BitMask::lowest_set_bit)]
+    fn contract_lowest_set_bit() {
+        let word: BitMaskWord = kani::any();
+        BitMask(word).lowest_set_bit();
+    }
+
+    #[kani::proof_for_contract(BitMask::trailing_zeros)]
+    fn contract_trailing_zeros() {
+        let word: BitMaskWord = kani::any();
+        BitMask(word).trailing_zeros();
+    }
+
+    #[kani::proof_for_contract(BitMask::leading_zeros)]
+    fn contract_leading_zeros() {
+        let word: BitMaskWord = kani::any();
+        BitMask(word).leading_zeros();
+    }
+}
+
 impl IntoIterator for BitMask {
     type Item = usize;
     type IntoIter = BitMaskIter;

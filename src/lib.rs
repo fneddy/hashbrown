@@ -66,6 +66,9 @@ mod set;
 mod table;
 
 #[cfg(kani)]
+mod kani_contracts;
+
+#[cfg(kani)]
 mod kani_proofs;
 
 #[cfg(all(kani, target_endian = "big"))]

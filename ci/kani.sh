@@ -21,6 +21,8 @@ done
 
 KANI_FLAGS=(
     -Z function-contracts
+    --jobs 1
+    --no-memory-safety-checks
 )
 
 run_host() {

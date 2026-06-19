@@ -9,6 +9,12 @@ fn verify_new_map_is_empty() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_insert_increases_len() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -19,6 +25,12 @@ fn verify_insert_increases_len() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_insert_same_key_does_not_grow_len() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -30,6 +42,12 @@ fn verify_insert_same_key_does_not_grow_len() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_get_after_insert() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -40,6 +58,10 @@ fn verify_get_after_insert() {
 }
 
 #[kani::proof]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
 fn verify_get_missing_key_returns_none() {
     let map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -47,6 +69,12 @@ fn verify_get_missing_key_returns_none() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_remove_decreases_len() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -59,6 +87,10 @@ fn verify_remove_decreases_len() {
 }
 
 #[kani::proof]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
 fn verify_remove_missing_key_returns_none() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -69,6 +101,12 @@ fn verify_remove_missing_key_returns_none() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_contains_key_after_insert() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -78,6 +116,12 @@ fn verify_contains_key_after_insert() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_contains_key_false_after_remove() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -91,6 +135,12 @@ fn verify_contains_key_false_after_remove() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_insert_overwrites_value() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -102,6 +152,12 @@ fn verify_insert_overwrites_value() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_two_distinct_keys() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k1: u8 = kani::any();
@@ -117,6 +173,12 @@ fn verify_two_distinct_keys() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_clear_empties_map() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -132,6 +194,12 @@ fn verify_clear_empties_map() {
 }
 
 #[kani::proof]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
 fn verify_capacity_at_least_len() {
     let mut map: HashMap<u8, u8> = HashMap::new();
     let k: u8 = kani::any();
@@ -145,6 +213,13 @@ fn verify_capacity_at_least_len() {
 
 #[kani::proof]
 #[kani::unwind(2)]
+#[kani::solver(kissat)]
+#[kani::stub_verified(crate::control::Group::match_tag)]
+#[kani::stub_verified(crate::control::Group::match_empty)]
+#[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
+#[kani::stub_verified(crate::control::Group::match_full)]
+#[kani::stub_verified(crate::control::Group::convert_special_to_empty_and_full_to_deleted)]
+#[kani::stub_verified(crate::raw::prev_pow2)]
 fn verify_with_capacity_has_sufficient_room() {
     let cap: usize = kani::any();
     kani::assume(cap <= 8);
