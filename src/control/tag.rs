@@ -13,18 +13,24 @@ impl Tag {
 
     /// Checks whether a control tag represents a full bucket (top bit is clear).
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| *result == (self.0 & 0x80 == 0)))]
+    #[cfg_attr(kani, kani::ensures(|result| *result == !self.is_special()))]
     pub(crate) const fn is_full(self) -> bool {
         self.0 & 0x80 == 0
     }
 
     /// Checks whether a control tag represents a special value (top bit is set).
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| *result == (self.0 & 0x80 != 0)))]
+    #[cfg_attr(kani, kani::ensures(|result| *result == !self.is_full()))]
     pub(crate) const fn is_special(self) -> bool {
         self.0 & 0x80 != 0
     }
 
     /// Checks whether a special control value is EMPTY (just check 1 bit).
     #[inline]
+    #[cfg_attr(kani, kani::requires(self.is_special()))]
+    #[cfg_attr(kani, kani::ensures(|result| *result == (self.0 & 0x01 != 0)))]
     pub(crate) const fn special_is_empty(self) -> bool {
         debug_assert!(self.is_special());
         self.0 & 0x01 != 0
@@ -32,6 +38,8 @@ impl Tag {
 
     /// Creates a control tag representing a full bucket with the given hash.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| result.is_full()))]
+    #[cfg_attr(kani, kani::ensures(|result| result.0 & 0x80 == 0))]
     pub(crate) const fn full(hash: u64) -> Tag {
         // Constant for function that grabs the top 7 bits of the hash.
         const MIN_HASH_LEN: usize = if mem::size_of::<usize>() < mem::size_of::<u64>() {

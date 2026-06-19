@@ -18,6 +18,7 @@ cfg_if! {
         target_feature = "sse2",
         any(target_arch = "x86", target_arch = "x86_64"),
         not(miri),
+        not(kani),
     ))] {
         mod sse2;
         use sse2 as imp;
@@ -28,6 +29,7 @@ cfg_if! {
         // See https://github.com/rust-lang/stdarch/issues/1484.
         target_endian = "little",
         not(miri),
+        not(kani),
     ))] {
         mod neon;
         use neon as imp;
@@ -36,6 +38,7 @@ cfg_if! {
         target_arch = "loongarch64",
         target_feature = "lsx",
         not(miri),
+        not(kani),
     ))] {
         mod lsx;
         use lsx as imp;

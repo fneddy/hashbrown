@@ -24,18 +24,22 @@ impl BitMask {
     /// Returns a new `BitMask` with the lowest bit removed.
     #[inline]
     #[must_use]
+    #[cfg_attr(kani, kani::ensures(|result| result.0 == (self.0 & self.0.wrapping_sub(1))))]
+    #[cfg_attr(kani, kani::ensures(|result| result.0 & self.0 == result.0))]
     fn remove_lowest_bit(self) -> Self {
         BitMask(self.0 & (self.0 - 1))
     }
 
     /// Returns whether the `BitMask` has at least one set bit.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| *result == (self.0 != 0)))]
     pub(crate) fn any_bit_set(self) -> bool {
         self.0 != 0
     }
 
     /// Returns the first set bit in the `BitMask`, if there is one.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| result.is_none() == (self.0 == 0)))]
     pub(crate) fn lowest_set_bit(self) -> Option<usize> {
         if let Some(nonzero) = NonZeroBitMaskWord::new(self.0) {
             Some(Self::nonzero_trailing_zeros(nonzero))
@@ -46,6 +50,13 @@ impl BitMask {
 
     /// Returns the number of trailing zeroes in the `BitMask`.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| {
+        if cfg!(target_arch = "arm") && BITMASK_STRIDE % 8 == 0 {
+            true
+        } else {
+            *result == self.0.trailing_zeros() as usize / BITMASK_STRIDE
+        }
+    }))]
     pub(crate) fn trailing_zeros(self) -> usize {
         // ARM doesn't have a trailing_zeroes instruction, and instead uses
         // reverse_bits (RBIT) + leading_zeroes (CLZ). However older ARM
@@ -61,6 +72,13 @@ impl BitMask {
 
     /// Same as above but takes a `NonZeroBitMaskWord`.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| {
+        if cfg!(target_arch = "arm") && BITMASK_STRIDE % 8 == 0 {
+            true
+        } else {
+            *result == nonzero.trailing_zeros() as usize / BITMASK_STRIDE
+        }
+    }))]
     fn nonzero_trailing_zeros(nonzero: NonZeroBitMaskWord) -> usize {
         if cfg!(target_arch = "arm") && BITMASK_STRIDE % 8 == 0 {
             // SAFETY: A byte-swapped non-zero value is still non-zero.
@@ -73,6 +91,7 @@ impl BitMask {
 
     /// Returns the number of leading zeroes in the `BitMask`.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| *result == self.0.leading_zeros() as usize / BITMASK_STRIDE))]
     pub(crate) fn leading_zeros(self) -> usize {
         self.0.leading_zeros() as usize / BITMASK_STRIDE
     }

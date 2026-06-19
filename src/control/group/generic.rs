@@ -29,6 +29,9 @@ pub(crate) const BITMASK_ITER_MASK: BitMaskWord = !0;
 
 /// Helper function to replicate a tag across a `GroupWord`.
 #[inline]
+#[cfg_attr(kani, kani::ensures(|result| {
+    result.to_ne_bytes().iter().all(|&b| b == tag.0)
+}))]
 fn repeat(tag: Tag) -> GroupWord {
     GroupWord::from_ne_bytes([tag.0; Group::WIDTH])
 }
@@ -102,6 +105,16 @@ impl Group {
     /// - This only happens if there is at least 1 true match.
     /// - The chance of this happening is very low (< 1% chance per tag).
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| {
+        let self_bytes = self.0.to_ne_bytes();
+        (0..Group::WIDTH).all(|i| {
+            if self_bytes[i] == tag.0 {
+                (result.0.to_le() >> (i * BITMASK_STRIDE)) & 0xFF != 0
+            } else {
+                true
+            }
+        })
+    }))]
     pub(crate) fn match_tag(self, tag: Tag) -> BitMask {
         // This algorithm is derived from
         // https://graphics.stanford.edu/~seander/bithacks.html##ValueInWord
@@ -112,6 +125,14 @@ impl Group {
     /// Returns a `BitMask` indicating all tags in the group which are
     /// `EMPTY`.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| {
+        let self_bytes = self.0.to_ne_bytes();
+        (0..Group::WIDTH).all(|i| {
+            let is_empty = self_bytes[i] == Tag::EMPTY.0;
+            let bit_set = (result.0.to_le() >> (i * BITMASK_STRIDE)) & 0xFF != 0;
+            if is_empty { bit_set } else { !bit_set || self_bytes[i] == Tag::DELETED.0 || self_bytes[i] & 0x80 == 0 }
+        })
+    }))]
     pub(crate) fn match_empty(self) -> BitMask {
         // If the high bit is set, then the tag must be either:
         // 1111_1111 (EMPTY) or 1000_0000 (DELETED).
@@ -122,6 +143,14 @@ impl Group {
     /// Returns a `BitMask` indicating all tags in the group which are
     /// `EMPTY` or `DELETED`.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| {
+        let self_bytes = self.0.to_ne_bytes();
+        (0..Group::WIDTH).all(|i| {
+            let has_high_bit = self_bytes[i] & 0x80 != 0;
+            let bit_set = (result.0.to_le() >> (i * BITMASK_STRIDE)) & 0xFF != 0;
+            has_high_bit == bit_set
+        })
+    }))]
     pub(crate) fn match_empty_or_deleted(self) -> BitMask {
         // A tag is EMPTY or DELETED iff the high bit is set
         BitMask((self.0 & repeat(Tag::DELETED)).to_le())
@@ -129,6 +158,14 @@ impl Group {
 
     /// Returns a `BitMask` indicating all tags in the group which are full.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| {
+        let self_bytes = self.0.to_ne_bytes();
+        (0..Group::WIDTH).all(|i| {
+            let is_full = self_bytes[i] & 0x80 == 0;
+            let bit_set = (result.0.to_le() >> (i * BITMASK_STRIDE)) & 0xFF != 0;
+            is_full == bit_set
+        })
+    }))]
     pub(crate) fn match_full(self) -> BitMask {
         BitMask(self.match_empty_or_deleted().0 ^ BITMASK_MASK)
     }
@@ -138,6 +175,17 @@ impl Group {
     /// - `DELETED => EMPTY`
     /// - `FULL => DELETED`
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| {
+        let in_bytes  = self.0.to_ne_bytes();
+        let out_bytes = result.0.to_ne_bytes();
+        (0..Group::WIDTH).all(|i| {
+            if in_bytes[i] & 0x80 != 0 {
+                out_bytes[i] == Tag::EMPTY.0
+            } else {
+                out_bytes[i] == Tag::DELETED.0
+            }
+        })
+    }))]
     pub(crate) fn convert_special_to_empty_and_full_to_deleted(self) -> Self {
         // Map high_bit = 1 (EMPTY or DELETED) to 1111_1111
         // and high_bit = 0 (FULL) to 1000_0000
@@ -148,5 +196,19 @@ impl Group {
         //   !0000_0000 + 0 = 1111_1111 + 0 = 1111_1111 (no carry)
         let full = !self.0 & repeat(Tag::DELETED);
         Group(!full + (full >> 7))
+    }
+
+    /// Constructs a `Group` from a native-endian `u64` word. Only used in Kani proofs.
+    #[cfg(kani)]
+    #[allow(dead_code)]
+    pub(crate) fn from_u64_ne(word: u64) -> Self {
+        Group(word as GroupWord)
+    }
+
+    /// Returns the underlying native-endian `u64` word. Only used in Kani proofs.
+    #[cfg(kani)]
+    #[allow(dead_code)]
+    pub(crate) fn to_u64_ne(self) -> u64 {
+        self.0 as u64
     }
 }

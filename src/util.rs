@@ -9,6 +9,7 @@ fn cold_path() {}
 
 #[cfg(not(feature = "nightly"))]
 #[inline(always)]
+#[cfg_attr(kani, kani::ensures(|result| *result == b))]
 pub(crate) fn likely(b: bool) -> bool {
     if b {
         true
@@ -20,6 +21,7 @@ pub(crate) fn likely(b: bool) -> bool {
 
 #[cfg(not(feature = "nightly"))]
 #[inline(always)]
+#[cfg_attr(kani, kani::ensures(|result| *result == b))]
 pub(crate) fn unlikely(b: bool) -> bool {
     if b {
         cold_path();

@@ -65,6 +65,12 @@ mod scopeguard;
 mod set;
 mod table;
 
+#[cfg(kani)]
+mod kani_proofs;
+
+#[cfg(all(kani, target_endian = "big"))]
+mod kani_proofs_s390x;
+
 pub use crate::hasher::DefaultHashBuilder;
 #[cfg(feature = "default-hasher")]
 pub use crate::hasher::DefaultHasher;

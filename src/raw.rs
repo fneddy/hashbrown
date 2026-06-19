@@ -57,6 +57,7 @@ impl<T> SizedTypeProperties for T {}
 /// Primary hash function, used to select the initial bucket to probe from.
 #[inline]
 #[expect(clippy::cast_possible_truncation)]
+#[cfg_attr(kani, kani::ensures(|result| *result == hash as usize))]
 fn h1(hash: u64) -> usize {
     // On 32-bit platforms we simply ignore the higher hash bits.
     hash as usize
@@ -101,6 +102,13 @@ impl ProbeSeq {
 // Workaround for emscripten bug emscripten-core/emscripten-fastcomp#258
 #[cfg_attr(target_os = "emscripten", inline(never))]
 #[cfg_attr(not(target_os = "emscripten"), inline)]
+#[cfg_attr(kani, kani::requires(cap != 0))]
+#[cfg_attr(kani, kani::ensures(|result| {
+    match result {
+        Some(buckets) => buckets.is_power_of_two() && *buckets >= cap,
+        None => true,
+    }
+}))]
 fn capacity_to_buckets(cap: usize, table_layout: TableLayout) -> Option<usize> {
     debug_assert_ne!(cap, 0);
 
@@ -179,6 +187,14 @@ fn ensure_bucket_bytes_at_least_ctrl_align(table_layout: TableLayout, buckets: u
 /// Returns the maximum effective capacity for the given bucket mask, taking
 /// the maximum load factor into account.
 #[inline]
+#[cfg_attr(kani, kani::requires(bucket_mask < usize::MAX))]
+#[cfg_attr(kani, kani::ensures(|result| {
+    if bucket_mask < 8 {
+        *result == bucket_mask
+    } else {
+        *result == ((bucket_mask + 1) / 8) * 7
+    }
+}))]
 fn bucket_mask_to_capacity(bucket_mask: usize) -> usize {
     if bucket_mask < 8 {
         // For tables with 1/2/4/8 buckets, we always reserve one empty slot.
@@ -1322,24 +1338,28 @@ impl<T, A: Allocator> RawTable<T, A> {
     /// This number is a lower bound; the table might be able to hold
     /// more, but is guaranteed to be able to hold at least this many.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| *result == self.table.items + self.table.growth_left))]
     pub(crate) fn capacity(&self) -> usize {
         self.table.items + self.table.growth_left
     }
 
     /// Returns the number of elements in the table.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| *result == self.table.items))]
     pub(crate) fn len(&self) -> usize {
         self.table.items
     }
 
     /// Returns `true` if the table contains no elements.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| *result == (self.table.items == 0)))]
     pub(crate) fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
     /// Returns the number of buckets in the table.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| *result == self.table.bucket_mask + 1))]
     pub(crate) fn num_buckets(&self) -> usize {
         self.table.bucket_mask + 1
     }
@@ -1507,6 +1527,8 @@ impl RawTableInner {
 
 /// Find the previous power of 2. If it's already a power of 2, it's unchanged.
 /// Passing zero is undefined behavior.
+#[cfg_attr(kani, kani::requires(z != 0))]
+#[cfg_attr(kani, kani::ensures(|result| result.is_power_of_two() && *result <= z))]
 pub(crate) fn prev_pow2(z: usize) -> usize {
     let shift = mem::size_of::<usize>() * 8 - 1;
     1 << (shift - (z.leading_zeros() as usize))
@@ -1517,6 +1539,12 @@ pub(crate) fn prev_pow2(z: usize) -> usize {
 ///
 /// This relies on some invariants of `capacity_to_buckets`, so only feed in
 /// an `allocation_size` calculated from `capacity_to_buckets`.
+#[cfg_attr(kani, kani::requires(
+    allocation_size > group_width &&
+    table_layout.size < usize::MAX &&
+    (allocation_size - group_width) / (table_layout.size + 1) > 0
+))]
+#[cfg_attr(kani, kani::ensures(|result| result.is_power_of_two()))]
 fn maximum_buckets_in(
     allocation_size: usize,
     table_layout: TableLayout,
@@ -2446,6 +2474,7 @@ impl RawTableInner {
     /// group exactly once. The loop using `probe_seq` must terminate upon
     /// reaching a group containing an empty bucket.
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| result.stride == 0 && result.pos <= self.bucket_mask))]
     fn probe_seq(&self, hash: u64) -> ProbeSeq {
         ProbeSeq {
             // This is the same as `hash as usize % self.num_buckets()` because the number
@@ -2456,6 +2485,8 @@ impl RawTableInner {
     }
 
     #[inline]
+    #[cfg_attr(kani, kani::requires(self.items < usize::MAX))]
+    #[cfg_attr(kani, kani::ensures(|_| self.items == old(self.items) + 1))]
     unsafe fn record_item_insert_at(&mut self, index: usize, old_ctrl: Tag, new_ctrl: Tag) {
         self.growth_left -= usize::from(old_ctrl.special_is_empty());
         unsafe {
@@ -2648,11 +2679,13 @@ impl RawTableInner {
     }
 
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| *result == self.bucket_mask + 1 + crate::control::Group::WIDTH))]
     fn num_ctrl_bytes(&self) -> usize {
         self.bucket_mask + 1 + Group::WIDTH
     }
 
     #[inline]
+    #[cfg_attr(kani, kani::ensures(|result| *result == (self.bucket_mask == 0)))]
     fn is_empty_singleton(&self) -> bool {
         self.bucket_mask == 0
     }
