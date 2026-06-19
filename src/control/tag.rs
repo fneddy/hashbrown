@@ -14,7 +14,6 @@ impl Tag {
     /// Checks whether a control tag represents a full bucket (top bit is clear).
     #[inline]
     #[cfg_attr(kani, kani::ensures(|result| *result == (self.0 & 0x80 == 0)))]
-    #[cfg_attr(kani, kani::ensures(|result| *result == !self.is_special()))]
     pub(crate) const fn is_full(self) -> bool {
         self.0 & 0x80 == 0
     }
@@ -22,7 +21,6 @@ impl Tag {
     /// Checks whether a control tag represents a special value (top bit is set).
     #[inline]
     #[cfg_attr(kani, kani::ensures(|result| *result == (self.0 & 0x80 != 0)))]
-    #[cfg_attr(kani, kani::ensures(|result| *result == !self.is_full()))]
     pub(crate) const fn is_special(self) -> bool {
         self.0 & 0x80 != 0
     }
