@@ -6,7 +6,7 @@ use crate::util::{likely, unlikely};
 fn contract_group_match_tag() {
     let word: u16 = kani::any();
     let tag_byte: u8 = kani::any();
-    let tag = Tag(tag_byte);
+    let tag = Tag::full(tag_byte as u64);
     let group = Group::from_u64_ne(word as u64);
     group.match_tag(tag);
 }

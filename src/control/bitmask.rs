@@ -17,6 +17,7 @@ use super::group::{BITMASK_ITER_MASK, BITMASK_STRIDE, BitMaskWord, NonZeroBitMas
 /// is set per element. This is done by applying `BITMASK_ITER_MASK` on the
 /// mask bits.
 #[derive(Copy, Clone)]
+#[cfg_attr(kani, derive(kani::Arbitrary))]
 pub(crate) struct BitMask(pub(crate) BitMaskWord);
 
 #[expect(clippy::use_self)]

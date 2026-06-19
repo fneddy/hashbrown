@@ -56,7 +56,6 @@ impl Tag {
         Tag((top7 & 0x7f) as u8) // truncation
     }
 }
-}
 
 #[cfg(kani)]
 mod kani_proofs {

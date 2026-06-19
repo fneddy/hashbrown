@@ -41,6 +41,7 @@ fn repeat(tag: Tag) -> GroupWord {
 ///
 /// This implementation uses a word-sized integer.
 #[derive(Copy, Clone)]
+#[cfg_attr(kani, derive(kani::Arbitrary))]
 pub(crate) struct Group(GroupWord);
 
 // We perform all operations in the native endianness, and convert to

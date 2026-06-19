@@ -21,6 +21,7 @@ done
 
 KANI_FLAGS=(
     -Z function-contracts
+    -Z stubbing
     --jobs 1
     --no-memory-safety-checks
 )
