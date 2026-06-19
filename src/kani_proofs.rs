@@ -9,6 +9,7 @@ fn verify_new_map_is_empty() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
@@ -25,6 +26,7 @@ fn verify_insert_increases_len() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
@@ -42,6 +44,7 @@ fn verify_insert_same_key_does_not_grow_len() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
@@ -58,6 +61,7 @@ fn verify_get_after_insert() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
 #[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
@@ -69,6 +73,7 @@ fn verify_get_missing_key_returns_none() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
@@ -87,6 +92,7 @@ fn verify_remove_decreases_len() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
 #[kani::stub_verified(crate::control::Group::match_empty_or_deleted)]
@@ -101,6 +107,7 @@ fn verify_remove_missing_key_returns_none() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
@@ -116,6 +123,7 @@ fn verify_contains_key_after_insert() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
@@ -135,6 +143,7 @@ fn verify_contains_key_false_after_remove() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
@@ -152,6 +161,7 @@ fn verify_insert_overwrites_value() {
 }
 
 #[kani::proof]
+#[kani::unwind(8)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
@@ -173,6 +183,7 @@ fn verify_two_distinct_keys() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
@@ -194,6 +205,7 @@ fn verify_clear_empties_map() {
 }
 
 #[kani::proof]
+#[kani::unwind(4)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]
@@ -212,7 +224,7 @@ fn verify_capacity_at_least_len() {
 }
 
 #[kani::proof]
-#[kani::unwind(2)]
+#[kani::unwind(4)]
 #[kani::solver(kissat)]
 #[kani::stub_verified(crate::control::Group::match_tag)]
 #[kani::stub_verified(crate::control::Group::match_empty)]

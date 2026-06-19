@@ -37,7 +37,6 @@ impl Tag {
     /// Creates a control tag representing a full bucket with the given hash.
     #[inline]
     #[cfg_attr(kani, kani::ensures(|result| result.is_full()))]
-    #[cfg_attr(kani, kani::ensures(|result| result.0 & 0x80 == 0))]
     pub(crate) const fn full(hash: u64) -> Tag {
         // Constant for function that grabs the top 7 bits of the hash.
         const MIN_HASH_LEN: usize = if mem::size_of::<usize>() < mem::size_of::<u64>() {

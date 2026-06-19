@@ -1,12 +1,14 @@
 use crate::control::{Group, Tag};
 use crate::raw::prev_pow2;
-use crate::util::{likely, unlikely};
 
 #[kani::proof_for_contract(Group::match_tag)]
 fn contract_group_match_tag() {
     let word: u16 = kani::any();
-    let tag_byte: u8 = kani::any();
-    let tag = Tag::full(tag_byte as u64);
+    // Place 7 arbitrary bits in the top 7 positions so Tag::full produces
+    // a tag with that exact byte value, covering the full space of full tags.
+    let tag_bits: u8 = kani::any();
+    kani::assume(tag_bits < 0x80);
+    let tag = Tag::full((tag_bits as u64) << 57);
     let group = Group::from_u64_ne(word as u64);
     group.match_tag(tag);
 }
@@ -39,16 +41,18 @@ fn contract_group_convert_special_to_empty_and_full_to_deleted() {
     group.convert_special_to_empty_and_full_to_deleted();
 }
 
-#[kani::proof_for_contract(likely)]
+#[cfg(not(feature = "nightly"))]
+#[kani::proof_for_contract(crate::util::likely)]
 fn contract_likely() {
     let b: bool = kani::any();
-    likely(b);
+    crate::util::likely(b);
 }
 
-#[kani::proof_for_contract(unlikely)]
+#[cfg(not(feature = "nightly"))]
+#[kani::proof_for_contract(crate::util::unlikely)]
 fn contract_unlikely() {
     let b: bool = kani::any();
-    unlikely(b);
+    crate::util::unlikely(b);
 }
 
 #[kani::proof_for_contract(prev_pow2)]

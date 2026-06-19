@@ -125,6 +125,18 @@ mod kani_proofs {
         let word: BitMaskWord = kani::any();
         BitMask(word).leading_zeros();
     }
+
+    #[kani::proof_for_contract(BitMask::remove_lowest_bit)]
+    fn contract_remove_lowest_bit() {
+        let word: BitMaskWord = kani::any();
+        BitMask(word).remove_lowest_bit();
+    }
+
+    #[kani::proof_for_contract(BitMask::nonzero_trailing_zeros)]
+    fn contract_nonzero_trailing_zeros() {
+        let word: NonZeroBitMaskWord = kani::any();
+        BitMask::nonzero_trailing_zeros(word);
+    }
 }
 
 impl IntoIterator for BitMask {
